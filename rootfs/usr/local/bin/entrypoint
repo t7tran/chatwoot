@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+[[ -n "$1" ]] && exec "$@"
+
+if [[ "$CW_ROLE" == "web" ]]; then
+	bundle exec rails db:chatwoot_prepare
+	! bundle exec rails runner /opt/entrypoint.rb && exit 1
+	exec bundle exec rails s -b ${CW_HOST:-0.0.0.0} -p ${CW_PORT:-3000}
+fi
+
+[[ "$CW_ROLE" == "worker" ]] && exec bundle exec sidekiq -C ${CW_WORKER_CONFIG:-config/sidekiq.yml}
+
+exec irb
