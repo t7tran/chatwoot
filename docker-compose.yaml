@@ -22,7 +22,11 @@ services:
       CW_ADMIN_PASSWORD: sup3rP@ss
       CW_INSTALLATION_NAME: name
       CW_BRAND_NAME: brand
-
+      CW_WEB_WIDGET: 'true'
+      CW_WEB_WIDGET_NAME: Demo Widget
+      CW_WEB_WIDGET_SITE_URL: http://localhost:8080
+      CW_WEB_WIDGET_SITE_TOKEN: token11
+      CW_WEB_WIDGET_HMAC_TOKEN: token22
   sidekiq:
     <<: *base
     depends_on:

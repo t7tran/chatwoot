@@ -28,6 +28,7 @@ user = User.find_or_create_by(email: ENV["CW_ADMIN_EMAIL"]) do |user|
   user.password = ENV["CW_ADMIN_PASSWORD"]
   user.skip_confirmation!
 end
+User.where(email: ENV["CW_ADMIN_EMAIL"]).update(password: ENV["CW_ADMIN_PASSWORD"])
 
 AccountUser.find_or_create_by(account_id: account.id, user_id: user.id, role: :administrator)
 
@@ -59,5 +60,36 @@ AccountUser.find_or_create_by(account_id: account.id, user_id: user.id, role: :a
       instConfig.update(value: ENV[env_var])
     end
   end
+
+if ENV.has_key?("CW_WEB_WIDGET") && ENV["CW_WEB_WIDGET"] == "true"
+  %w[
+      CW_WEB_WIDGET_NAME
+      CW_WEB_WIDGET_SITE_URL
+      CW_WEB_WIDGET_SITE_TOKEN
+      CW_WEB_WIDGET_HMAC_TOKEN
+    ].each do |env_var|
+      if !ENV.has_key?(env_var) || ENV[env_var].blank?
+        raise <<~EOL
+        Missing environment variable: #{env_var}
+        EOL
+      end
+    end
+  
+  widget = Channel::WebWidget.find_or_create_by(account: account, website_url: ENV["CW_WEB_WIDGET_SITE_URL"]) do |w|
+    w.website_token = ENV["CW_WEB_WIDGET_SITE_TOKEN"]
+    w.hmac_token = ENV["CW_WEB_WIDGET_HMAC_TOKEN"]
+  end
+  widget.update(
+                widget_color:          ENV["CW_WEB_WIDGET_COLOR"].presence || "#009CE0",
+                welcome_title:         ENV["CW_WEB_WIDGET_WELCOME_TITLE"].presence || "",
+                welcome_tagline:       ENV["CW_WEB_WIDGET_WELCOME_TAGLINE"].presence || "",
+                reply_time:            (ENV["CW_WEB_WIDGET_REPLY_TIME"].presence || "0").to_i,
+                pre_chat_form_enabled: (ENV["CW_WEB_WIDGET_PRE_CHAT_FORM_ENABLED"].presence || "") == "true",
+                website_token:         ENV["CW_WEB_WIDGET_SITE_TOKEN"],
+                hmac_token:            ENV["CW_WEB_WIDGET_HMAC_TOKEN"]
+                )
+  inbox = Inbox.find_or_create_by(channel: widget, account: account, name: ENV["CW_WEB_WIDGET_NAME"])
+  InboxMember.find_or_create_by(user: user, inbox: inbox)
+end
 
 GlobalConfig.clear_cache
