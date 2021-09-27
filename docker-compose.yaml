@@ -46,6 +46,8 @@ services:
   redis:
     image: redis:6.0.9-alpine
     restart: always
+    read_only: true
+    user: 999:1000
     command: ["sh", "-c", "redis-server --requirepass \"$REDIS_PASSWORD\""]
     env_file: .env
     volumes:
