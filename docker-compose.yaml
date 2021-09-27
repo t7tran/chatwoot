@@ -1,13 +1,12 @@
-version: '3'
+version: '3.7'
+
+x-base: &base
+  image: t7tran/chatwoot:v1.20.0
+  env_file: .env ## Change this file for customized env variables
+  volumes:
+  - chatwoot:/app/storage
 
 services:
-  base: &base
-    image: t7tran/chatwoot:v1.20.0
-    env_file: .env ## Change this file for customized env variables
-    volumes:
-    - ./data/storage:/app/storage
-    #- ./config/installation_config.yml:/app/config/installation_config.yml:ro
-
   rails:
     <<: *base
     depends_on:
@@ -33,12 +32,14 @@ services:
       CW_ROLE: worker
 
   postgres:
-    image: postgres:12
+    image: t7tran/postgres:13.4
     restart: always
+    read_only: true
     volumes:
-    - ./data/postgres:/var/lib/postgresql/data
+    - postgres:/var/lib/postgresql/data
+    - temp:/var/run/postgresql
+    - ./init:/docker-entrypoint-initdb.d:ro
     environment:
-      POSTGRES_DB: chatwoot
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
 
@@ -48,7 +49,7 @@ services:
     command: ["sh", "-c", "redis-server --requirepass \"$REDIS_PASSWORD\""]
     env_file: .env
     volumes:
-    - ./data/redis:/data
+    - redis:/data
 
   mailhog:
     image: mailhog/mailhog:v1.0.1
@@ -57,3 +58,20 @@ services:
     ports:
     - 8025:8025 # web ui
     #- 1025:1025 # smtp server
+
+volumes:
+  redis:
+    labels:
+    - "keep=true"
+    - "app=chatwoot"
+  postgres:
+    labels:
+    - "keep=true"
+    - "app=chatwoot"
+  chatwoot:
+    labels:
+    - "keep=true"
+    - "app=chatwoot"
+  temp:
+    labels:
+    - "app=chatwoot"
