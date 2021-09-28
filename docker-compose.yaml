@@ -18,8 +18,10 @@ services:
       CW_ROLE: web
       CW_ACCOUNT_NAME: Chatwoot Demo
       CW_ACCOUNT_DOMAIN: localhost
+      CW_ACCOUNT_EMAIL: support@yourcompany.com
       CW_ADMIN_EMAIL: admin@yourcompany.com
       CW_ADMIN_PASSWORD: sup3rP@ss
+      CW_ADMIN_ACCESS_TOKEN: sup3rT0ken2
       CW_INSTALLATION_NAME: name
       CW_BRAND_NAME: brand
       CW_WEB_WIDGET: 'true'

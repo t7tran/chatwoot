@@ -1,6 +1,7 @@
 %w[
     CW_ACCOUNT_NAME
     CW_ACCOUNT_DOMAIN
+    CW_ACCOUNT_EMAIL
     CW_ADMIN_EMAIL
     CW_ADMIN_PASSWORD
   ].each do |env_var|
@@ -13,22 +14,28 @@
 
 GlobalConfig.clear_cache
 
-SuperAdmin.where(email: ENV["CW_ADMIN_EMAIL"]).first_or_create(password: ENV["CW_ADMIN_PASSWORD"])
-SuperAdmin.where(email: ENV["CW_ADMIN_EMAIL"]).update(password: ENV["CW_ADMIN_PASSWORD"])
+admin = SuperAdmin.where(email: ENV["CW_ADMIN_EMAIL"]).first_or_create(password: ENV["CW_ADMIN_PASSWORD"])
+admin.update(password: ENV["CW_ADMIN_PASSWORD"])
 
 ::Redis::Alfred.delete(::Redis::Alfred::CHATWOOT_INSTALLATION_ONBOARDING)
 
 account = Account.find_or_create_by(domain: ENV["CW_ACCOUNT_DOMAIN"]) do |acc|
   acc.name = ENV["CW_ACCOUNT_NAME"]
-  acc.support_email = ENV.fetch('MAILER_SENDER_EMAIL')
+  acc.support_email = ENV["CW_ACCOUNT_EMAIL"]
 end
+account.update(name: ENV["CW_ACCOUNT_NAME"], support_email: ENV["CW_ACCOUNT_EMAIL"])
 
 user = User.find_or_create_by(email: ENV["CW_ADMIN_EMAIL"]) do |user|
   user.name = "Admin"
   user.password = ENV["CW_ADMIN_PASSWORD"]
   user.skip_confirmation!
 end
-User.where(email: ENV["CW_ADMIN_EMAIL"]).update(password: ENV["CW_ADMIN_PASSWORD"])
+user.update(password: ENV["CW_ADMIN_PASSWORD"])
+
+token = AccessToken.where(owner_id: user.id).first
+if (ENV["CW_ADMIN_ACCESS_TOKEN"].presence || token.token) != token.token
+  token.update(token: ENV["CW_ADMIN_ACCESS_TOKEN"])
+end
 
 AccountUser.find_or_create_by(account_id: account.id, user_id: user.id, role: :administrator)
 
