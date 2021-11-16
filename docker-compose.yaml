@@ -1,7 +1,7 @@
 version: '3.7'
 
 x-base: &base
-  image: t7tran/chatwoot:v1.21.1
+  image: t7tran/chatwoot:v1.22.0
   env_file: .env ## Change this file for customized env variables
   volumes:
   - chatwoot:/app/storage
