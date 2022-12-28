@@ -1,4 +1,4 @@
-FROM chatwoot/chatwoot:v2.11.0
+FROM chatwoot/chatwoot:v2.12.0
 
 ENV INSTALLATION_ENV=docker \
     NODE_ENV=production \
