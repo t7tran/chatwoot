@@ -8,7 +8,8 @@ ENV INSTALLATION_ENV=docker \
 
 COPY ./rootfs /
 
-RUN addgroup -g 1000 chatwoot && adduser -u 1000 -S -D -G chatwoot chatwoot && \
+RUN apk upgrade --no-cache && \
+    addgroup -g 1000 chatwoot && adduser -u 1000 -S -D -G chatwoot chatwoot && \
 # make executables
     chmod +x /usr/local/bin/* && \
 # locked all installation configs
