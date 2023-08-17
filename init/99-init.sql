@@ -10,12 +10,13 @@ BEGIN
 END
 $do$;
 
-REVOKE CONNECT ON DATABASE chatwoot FROM PUBLIC;
+REVOKE CONNECT, CREATE ON DATABASE chatwoot FROM PUBLIC;
 
-GRANT CONNECT
+GRANT CONNECT, CREATE
 ON DATABASE chatwoot 
 TO chatwoot;
 
 \c chatwoot
 create extension if not exists pg_stat_statements;
 create extension if not exists pgcrypto;
+create extension if not exists pg_trgm;

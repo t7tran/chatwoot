@@ -1,19 +1,19 @@
-version: '3.7'
+version: "3.7"
 
 x-base: &base
-  image: t7tran/chatwoot:2.18.0
+  image: ghcr.io/t7tran/chatwoot:3.0.0
   env_file: .env ## Change this file for customized env variables
   volumes:
-  - chatwoot:/app/storage
+    - chatwoot:/app/storage
 
 services:
   rails:
     <<: *base
     depends_on:
-    - postgres
-    - redis
+      - postgres
+      - redis
     ports:
-    - 3000:3000
+      - 3000:3000
     environment:
       CW_ROLE: web
       CW_ACCOUNT_NAME: Chatwoot Demo
@@ -24,7 +24,7 @@ services:
       CW_ADMIN_ACCESS_TOKEN: sup3rT0ken2
       CW_INSTALLATION_NAME: name
       CW_BRAND_NAME: brand
-      CW_WEB_WIDGET: 'true'
+      CW_WEB_WIDGET: "true"
       CW_WEB_WIDGET_NAME: Demo Widget
       CW_WEB_WIDGET_SITE_URL: http://localhost:8080
       CW_WEB_WIDGET_SITE_TOKEN: token11
@@ -32,54 +32,52 @@ services:
   sidekiq:
     <<: *base
     depends_on:
-    - postgres
-    - redis
+      - postgres
+      - redis
     environment:
       CW_ROLE: worker
 
   postgres:
-    image: t7tran/postgres:13.4
+    image: ghcr.io/t7tran/postgres:14.8.0
     restart: always
     read_only: true
     volumes:
-    - postgres:/var/lib/postgresql/data
-    - temp:/var/run/postgresql
-    - ./init:/docker-entrypoint-initdb.d:ro
+      - postgres:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    tmpfs:
+      - /var/run/postgresql
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
 
   redis:
-    image: redis:6.0.9-alpine
+    image: redis:7.2.0-alpine
     restart: always
     read_only: true
     user: 999:1000
-    command: ["sh", "-c", "redis-server --requirepass \"$REDIS_PASSWORD\""]
+    command: ["sh", "-c", 'redis-server --requirepass "$REDIS_PASSWORD"']
     env_file: .env
     volumes:
-    - redis:/data
+      - redis:/data
 
   mailhog:
     image: mailhog/mailhog:v1.0.1
     logging:
-      driver: 'none'  # disable saving logs
+      driver: "none" # disable saving logs
     ports:
-    - 8025:8025 # web ui
+      - 8025:8025 # web ui
     #- 1025:1025 # smtp server
 
 volumes:
   redis:
     labels:
-    - "keep=true"
-    - "app=chatwoot"
+      - "keep=true"
+      - "app=chatwoot"
   postgres:
     labels:
-    - "keep=true"
-    - "app=chatwoot"
+      - "keep=true"
+      - "app=chatwoot"
   chatwoot:
     labels:
-    - "keep=true"
-    - "app=chatwoot"
-  temp:
-    labels:
-    - "app=chatwoot"
+      - "keep=true"
+      - "app=chatwoot"
